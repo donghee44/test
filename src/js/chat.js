@@ -6,6 +6,8 @@ const chatList = document.querySelector(".chatting-list")
 const chatInput=document.querySelector(".chatting-input")
 const sendButton=document.querySelector(".send-button")
 const displayContainer = document.querySelector(".display-container")
+const roomname = document.querySelector(".roomjoin")
+const roomnumber = document.querySelector(".roomnumber")
 
 chatInput.addEventListener("keypress",(event)=>{
     if(event.keyCode===13){
@@ -14,15 +16,37 @@ chatInput.addEventListener("keypress",(event)=>{
 })
 function send(){
     const param = {
+        number:roomnumber.value,
         name:nickname.value,
         msg:chatInput.value
         
     }
+    chatInput.value=""
     socket.emit("chatting",param)
 }
 sendButton.addEventListener("click",send)
 
-socket.emit("chatting","from front")
+function room(){
+    const number=roomnumber.value
+   socket.emit("joinroom",number)
+   console.log(number)
+}
+roomname.addEventListener("click",room)
+
+
+socket.on("broadcast",(data)=>{
+    const item = new LiModel(data+"님이 입장하셨습니다.")
+    item.makeLi()
+})
+
+
+socket.on("broadcast2",(data)=>{
+    console.log(data)
+    const {id,number}= data
+    console.log(id,number)
+    const item = new LiModel(id+"님이"+number+"방에 입장하셨습니다.")
+    item.makeLi()
+})
 
 socket.on("chatting",(data)=>{
     const {name,msg,time} = data
@@ -48,4 +72,17 @@ function LiModel(name,msg,time){
         li.innerHTML=dom;
         chatList.appendChild(li)
     }
+
+    socket.on("disconnect",()=>{
+        console.log(nickname.value)
+    })
+    
+    // function room(){
+    //     const number=roomnumber.value
+    //    socket.emit('joinroom',number)
+    //    console.log(number)
+    // }
+    // roomname.addEventListener("click",room)
+
+ 
 }
